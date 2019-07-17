@@ -1,0 +1,41 @@
+from confluent_kafka import Consumer, KafkaError
+import logging
+logging.basicConfig(level=logging.DEBUG)
+import json
+
+from streamz import Stream
+def alter_message(x):
+   return x['client_id']
+
+source = Stream()
+
+source.map(alter_message).sink(print)
+
+source = Stream.from_kafka(['supramoteur1'],
+           {
+    'bootstrap.servers': '35.180.242.51:9092',
+    'group.id': 'mygroup',
+    'auto.offset.reset': 'earliest'
+
+})
+
+''' 
+# doctest: +SKIP
+c = Consumer({
+})
+
+c.subscribe(['supramoteur1'])
+
+while True:
+   msg = c.poll(1.0)
+   if msg is None:
+       continue
+   if msg.error():
+       print("Consumer error: {}".format(msg.error()))
+       continue
+   event = msg.value().decode('utf-8')
+
+   source.emit(json.loads(event))
+
+c.close()
+'''
