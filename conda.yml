@@ -1,0 +1,14 @@
+name: CEP
+channels:
+  - defaults
+  - anaconda
+dependencies:
+  - python==3.6
+  - streamz
+  - pandas
+  - dask
+  - pip:
+      - confluent-kafka
+      - cassandra-driver
+
+
