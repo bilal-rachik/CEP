@@ -6,9 +6,12 @@ import json
 from dask.distributed import Client
 from time import sleep
 import random
+from time import time
 
 #dask
 client = Client('35.180.242.51:8786')
+import os
+client.run(lambda: os.system("pip install cassandra-driver"))
 print('befor upload')
 
 #streamz
@@ -17,14 +20,22 @@ source = Stream.from_kafka(['supramoteur'], {
    'group.id': 'mygroup1'
 }, loop=client.loop)
 
-#lient.upload_environment(name="CEP",'/home/bilal/anaconda3/envs/environment.zip')
+def time_final(entry):
+    tt=time()-entry['time']
+    return tt
 
 def ecrire(entry):
+    entry['time_before']=time()
     with  open('data.txt',"a+") as f:
         f.write("%s\r\n" % entry)
         insert_to(entry)
+    entry['time_after']=round(-entry['time'],4)
+    return entry
 
+
+sessionmap = {}
 def insert_to(entry):
+
     from cassandra.cluster import Cluster
     cluster_cassandra = Cluster(['35.180.227.49'])
     session = cluster_cassandra.connect('supramoteur')
@@ -35,8 +46,6 @@ def insert_to(entry):
         """, (str(entry['clientId']), entry['event_type'], entry['category'], entry['endDate'], entry['label'], entry['name'],
               entry['startDate'], entry['status']
                           , entry['subject']))
-
-
 
 print('Starting...')
 futures = source\
